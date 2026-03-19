@@ -1,0 +1,168 @@
+/* ── Google Fonts — MUST be first ────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Override Tailwind Preflight ─────────────────────────────────────────── */
+@layer base {
+  html, body, #root {
+    background-color: #050505;
+    color: #F8FAFC;
+    min-height: 100vh;
+  }
+}
+
+/* ── Design Tokens ────────────────────────────────────────────────────────── */
+:root {
+  --obsidian:          #050505;
+  --electric-blue:     #00F0FF;
+  --hyper-purple:      #8B5CF6;
+  --purple-glow:       #A78BFA;
+  --glass-bg:          rgba(255, 255, 255, 0.04);
+  --glass-border:      rgba(255, 255, 255, 0.08);
+  --text-primary:      #F8FAFC;
+  --text-secondary:    #94A3B8;
+  --text-muted:        #475569;
+  --grid-color:        rgba(0, 240, 255, 0.04);
+}
+
+/* ── Global Reset & Base ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* THIS IS THE KEY FIX — force dark background on everything */
+html,
+body,
+#root {
+  background-color: #050505 !important;
+  color: #F8FAFC !important;
+  min-height: 100vh;
+  width: 100%;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  cursor: none;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Custom Cursor ────────────────────────────────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: var(--electric-blue);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, opacity 0.3s;
+  box-shadow: 0 0 15px var(--electric-blue), 0 0 30px rgba(0, 240, 255, 0.4);
+  mix-blend-mode: screen;
+}
+
+#cursor-trail {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: left 0.12s ease-out, top 0.12s ease-out;
+}
+
+/* ── Grid Overlay ─────────────────────────────────────────────────────────── */
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+}
+
+/* ── Noise Texture ────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ── Marquee animations ───────────────────────────────────────────────────── */
+.marquee-wrapper {
+  overflow: hidden;
+  position: relative;
+}
+
+.marquee-wrapper::before,
+.marquee-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, #050505, transparent);
+}
+
+.marquee-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, #050505, transparent);
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Glow helpers ─────────────────────────────────────────────────────────── */
+.glow-text {
+  text-shadow:
+    0 0 40px rgba(0, 240, 255, 0.3),
+    0 0 80px rgba(0, 240, 255, 0.1);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.2); border-radius: 2px; }
+
+/* ── Tailwind base overrides (prevent white flash) ────────────────────────── */
+@layer base {
+  html { background-color: #050505; }
+  body { background-color: #050505; color: #F8FAFC; }
+}
