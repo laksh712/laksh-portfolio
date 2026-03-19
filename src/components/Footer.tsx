@@ -20,7 +20,8 @@ const socialLinks = [
     ),
   },
   {
-    label: 'Email',
+    // show the actual address so visitors know where they're writing to
+    label: 'lakshbhamre01@gmail.com',
     href: 'mailto:lakshbhamre01@gmail.com',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -42,50 +43,49 @@ export default function Footer() {
       transition={{ duration: 0.6 }}
     >
       {/* Left — name */}
-      <span
-        className="font-mono text-sm"
-        style={{ color: '#475569' }}
-      >
+      <span className="font-mono text-sm" style={{ color: '#475569' }}>
         © {new Date().getFullYear()} Laksh Bhamare
       </span>
 
       {/* Center — social links */}
-      <div className="flex items-center gap-3">
-        {socialLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs no-underline transition-all duration-200"
-            style={{
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#475569',
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement
-              el.style.borderColor = 'rgba(0,240,255,0.3)'
-              el.style.color = '#00F0FF'
-              el.style.background = 'rgba(0,240,255,0.04)'
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget as HTMLAnchorElement
-              el.style.borderColor = 'rgba(255,255,255,0.08)'
-              el.style.color = '#475569'
-              el.style.background = 'transparent'
-            }}
-          >
-            {link.icon}
-            {link.label}
-          </a>
-        ))}
+      <div className="flex items-center gap-3 flex-wrap justify-center">
+        {socialLinks.map((link) => {
+          // mailto: / tel: must use target="_self" — _blank breaks mail clients
+          const isExternalUrl = link.href.startsWith('http')
+
+          return (
+            <a
+              key={link.label}
+              href={link.href}
+              target={isExternalUrl ? '_blank' : '_self'}
+              rel={isExternalUrl ? 'noopener noreferrer' : undefined}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs no-underline transition-all duration-200"
+              style={{
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#475569',
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement
+                el.style.borderColor = 'rgba(0,240,255,0.3)'
+                el.style.color = '#00F0FF'
+                el.style.background = 'rgba(0,240,255,0.04)'
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement
+                el.style.borderColor = 'rgba(255,255,255,0.08)'
+                el.style.color = '#475569'
+                el.style.background = 'transparent'
+              }}
+            >
+              {link.icon}
+              {link.label}
+            </a>
+          )
+        })}
       </div>
 
       {/* Right — version badge */}
-      <span
-        className="font-mono text-sm"
-        style={{ color: '#00F0FF' }}
-      >
+      <span className="font-mono text-sm" style={{ color: '#00F0FF' }}>
         v1.0.0
       </span>
     </motion.footer>
