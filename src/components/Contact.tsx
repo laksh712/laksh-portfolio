@@ -1,7 +1,37 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState, type ChangeEvent, type FocusEvent } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const contactInfo = [
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface ContactInfoItem {
+  label: string
+  value: string
+  href: string
+  icon: React.ReactNode
+}
+
+interface SocialLinkItem {
+  label: string
+  href: string
+  icon: React.ReactNode
+}
+
+interface FormFields {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+type FormErrors = FormFields
+type FormTouched = Record<keyof FormFields, boolean | string>
+
+interface ValidationResult {
+  errors: FormErrors
+  valid: boolean
+}
+
+// ── Static data ───────────────────────────────────────────────────────────────
+const contactInfo: ContactInfoItem[] = [
   {
     label: 'Email',
     value: 'lakshbhamre01@gmail.com',
@@ -15,8 +45,8 @@ const contactInfo = [
   },
   {
     label: 'Phone',
-    value: '+91 853 072 312',
-    href: 'tel:+91853072312',
+    value: '+91 853 072 1312',
+    href: 'tel:+918530721312',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
@@ -24,8 +54,7 @@ const contactInfo = [
     ),
   },
 ]
-
-const socialLinks = [
+const socialLinks: SocialLinkItem[] = [
   {
     label: 'GitHub',
     href: 'https://github.com/laksh712',
@@ -46,8 +75,151 @@ const socialLinks = [
   },
 ]
 
+// ── Validation ────────────────────────────────────────────────────────────────
+const EMPTY_FORM: FormFields = { name: '', email: '', subject: '', message: '' }
+const EMPTY_ERRORS: FormErrors = { name: '', email: '', subject: '', message: '' }
+
+function validate(fields: FormFields): ValidationResult {
+  const errors: FormErrors = { ...EMPTY_ERRORS }
+  let valid = true
+
+  if (!fields.name.trim()) {
+    errors.name = 'Name is required.'
+    valid = false
+  } else if (fields.name.trim().length < 2) {
+    errors.name = 'Name must be at least 2 characters.'
+    valid = false
+  }
+
+  if (!fields.email.trim()) {
+    errors.email = 'Email is required.'
+    valid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) {
+    errors.email = 'Please enter a valid email address.'
+    valid = false
+  }
+
+  if (!fields.subject.trim()) {
+    errors.subject = 'Subject is required.'
+    valid = false
+  } else if (fields.subject.trim().length < 3) {
+    errors.subject = 'Subject must be at least 3 characters.'
+    valid = false
+  }
+
+  if (!fields.message.trim()) {
+    errors.message = 'Message is required.'
+    valid = false
+  } else if (fields.message.trim().length < 10) {
+    errors.message = 'Message must be at least 10 characters.'
+    valid = false
+  }
+
+  return { errors, valid }
+}
+
+// ── Inline error message ──────────────────────────────────────────────────────
+interface FieldErrorProps {
+  message: string
+}
+
+function FieldError({ message }: FieldErrorProps) {
+  return (
+    <AnimatePresence>
+      {message && (
+        <motion.p
+          initial={{ opacity: 0, y: -4, height: 0 }}
+          animate={{ opacity: 1, y: 0, height: 'auto' }}
+          exit={{ opacity: 0, y: -4, height: 0 }}
+          transition={{ duration: 0.2 }}
+          style={{
+            color: '#F87171',
+            fontSize: 11,
+            fontFamily: 'monospace',
+            letterSpacing: '0.05em',
+            marginTop: 6,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            overflow: 'hidden',
+          }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          {message}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// ── Border colour helper ──────────────────────────────────────────────────────
+function getBorderColor(hasError: boolean, isFocused: boolean): string {
+  if (hasError) return 'rgba(248,113,113,0.55)'
+  if (isFocused) return 'rgba(0,240,255,0.4)'
+  return 'rgba(255,255,255,0.08)'
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function Contact() {
-  const [submitted, setSubmitted] = useState(false)
+  const [fields, setFields]       = useState<FormFields>(EMPTY_FORM)
+  const [errors, setErrors]       = useState<FormErrors>(EMPTY_ERRORS)
+  const [touched, setTouched]     = useState<FormTouched>({ name: false, email: false, subject: false, message: false })
+  const [focused, setFocused]     = useState<string>('')
+  const [submitted, setSubmitted] = useState<boolean>(false)
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    const { name, value } = e.target
+    const updated: FormFields = { ...fields, [name]: value }
+    setFields(updated)
+    // Live-validate only already-touched fields
+    if (touched[name as keyof FormFields]) {
+      const { errors: newErrors } = validate(updated)
+      setErrors((prev) => ({ ...prev, [name]: newErrors[name as keyof FormErrors] }))
+    }
+  }
+
+  const handleBlur = (
+    e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    const { name } = e.target
+    setFocused('')
+    setTouched((prev) => ({ ...prev, [name]: true }))
+    const { errors: newErrors } = validate(fields)
+    setErrors((prev) => ({ ...prev, [name]: newErrors[name as keyof FormErrors] }))
+  }
+
+  const handleFocus = (
+    e: FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    setFocused(e.target.name)
+  }
+
+  const handleSubmit = (): void => {
+    // Touch all fields to surface every error at once
+    setTouched({ name: true, email: true, subject: true, message: true })
+    const { errors: newErrors, valid } = validate(fields)
+    setErrors(newErrors)
+    if (!valid) return
+
+    // Success → clear everything
+    setSubmitted(true)
+    setFields(EMPTY_FORM)
+    setErrors(EMPTY_ERRORS)
+    setTouched({ name: false, email: false, subject: false, message: false })
+    setTimeout(() => setSubmitted(false), 3000)
+  }
+
+  const inputStyle = (name: keyof FormFields): React.CSSProperties => ({
+    background: 'rgba(255,255,255,0.03)',
+    border: `1px solid ${getBorderColor(!!errors[name], focused === name)}`,
+    color: '#F8FAFC',
+    fontFamily: 'Space Grotesk, sans-serif',
+    transition: 'border-color 0.2s',
+  })
 
   return (
     <section id="contact" className="relative z-10" style={{ padding: '100px 40px' }}>
@@ -63,35 +235,17 @@ export default function Contact() {
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
         {/* Background glows */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 400, height: 400,
-            background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)',
-            top: -200, right: -200, borderRadius: '50%',
-          }}
-        />
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            width: 300, height: 300,
-            background: 'radial-gradient(circle, rgba(0,240,255,0.05) 0%, transparent 70%)',
-            bottom: -150, left: -100, borderRadius: '50%',
-          }}
-        />
+        <div className="absolute pointer-events-none" style={{ width: 400, height: 400, background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)', top: -200, right: -200, borderRadius: '50%' }} />
+        <div className="absolute pointer-events-none" style={{ width: 300, height: 300, background: 'radial-gradient(circle, rgba(0,240,255,0.05) 0%, transparent 70%)', bottom: -150, left: -100, borderRadius: '50%' }} />
 
         {/* Header */}
-        <p className="font-mono text-xs tracking-widest uppercase mb-3" style={{ color: '#00F0FF' }}>
-          Contact
-        </p>
-        <h2 className="font-bold mb-2" style={{ fontSize: 40, letterSpacing: '-1.5px' }}>
-          Let's build something.
-        </h2>
+        <p className="font-mono text-xs tracking-widest uppercase mb-3" style={{ color: '#00F0FF' }}>Contact</p>
+        <h2 className="font-bold mb-2" style={{ fontSize: 40, letterSpacing: '-1.5px' }}>Let's build something.</h2>
         <p className="text-base font-light mb-8" style={{ color: '#94A3B8', lineHeight: 1.7 }}>
           Have an interesting problem? I'd love to hear about it. Response within 24 hours.
         </p>
 
-        {/* ── Contact Info Cards ── */}
+        {/* Contact Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
           {contactInfo.map((item, i) => (
             <motion.a
@@ -100,54 +254,21 @@ export default function Contact() {
               target={item.href.startsWith('mailto') || item.href.startsWith('tel') ? '_self' : '_blank'}
               rel="noreferrer"
               className="no-underline flex items-center gap-4 p-4 rounded-xl group"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.5 }}
-              whileHover={{
-                borderColor: 'rgba(0,240,255,0.25)',
-                background: 'rgba(0,240,255,0.04)',
-                y: -2,
-              }}
+              whileHover={{ borderColor: 'rgba(0,240,255,0.25)', background: 'rgba(0,240,255,0.04)', y: -2 }}
             >
-              {/* Icon bubble */}
-              <div
-                className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200"
-                style={{
-                  background: 'rgba(0,240,255,0.08)',
-                  color: '#00F0FF',
-                }}
-              >
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,240,255,0.08)', color: '#00F0FF' }}>
                 {item.icon}
               </div>
-
-              {/* Text */}
               <div className="min-w-0">
-                <p
-                  className="font-mono text-xs tracking-widest uppercase mb-0.5"
-                  style={{ color: '#475569' }}
-                >
-                  {item.label}
-                </p>
-                <p
-                  className="text-sm font-medium truncate transition-colors duration-200 group-hover:text-[#00F0FF]"
-                  style={{ color: '#F8FAFC' }}
-                >
-                  {item.value}
-                </p>
+                <p className="font-mono text-xs tracking-widest uppercase mb-0.5" style={{ color: '#475569' }}>{item.label}</p>
+                <p className="text-sm font-medium truncate transition-colors duration-200 group-hover:text-[#00F0FF]" style={{ color: '#F8FAFC' }}>{item.value}</p>
               </div>
-
-              {/* Arrow */}
-              <svg
-                className="flex-shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="#00F0FF" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round"
-              >
+              <svg className="flex-shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7"/>
                 <polyline points="7 7 17 7 17 17"/>
               </svg>
@@ -155,104 +276,81 @@ export default function Contact() {
           ))}
         </div>
 
-        {/* ── Divider ── */}
-        <div
-          className="mb-8"
-          style={{ height: 1, background: 'rgba(255,255,255,0.06)' }}
-        />
+        {/* Divider */}
+        <div className="mb-8" style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
 
         {/* ── Form ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Name */}
           <div>
-            <label
-              className="block font-mono text-xs tracking-widest uppercase mb-2"
-              style={{ color: '#94A3B8' }}
-            >
-              Name
-            </label>
+            <label className="block font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#94A3B8' }}>Name</label>
             <input
               type="text"
+              name="name"
+              value={fields.name}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               placeholder="Your name"
-              className="w-full px-4 py-3.5 text-sm outline-none rounded-lg transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#F8FAFC',
-                fontFamily: 'Space Grotesk, sans-serif',
-              }}
-              onFocus={(e) => (e.target.style.borderColor = 'rgba(0,240,255,0.4)')}
-              onBlur={(e)  => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+              className="w-full px-4 py-3.5 text-sm outline-none rounded-lg"
+              style={inputStyle('name')}
             />
+            <FieldError message={errors.name} />
           </div>
+
+          {/* Email */}
           <div>
-            <label
-              className="block font-mono text-xs tracking-widest uppercase mb-2"
-              style={{ color: '#94A3B8' }}
-            >
-              Email
-            </label>
+            <label className="block font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#94A3B8' }}>Email</label>
             <input
               type="email"
+              name="email"
+              value={fields.email}
+              onChange={handleChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
               placeholder="you@example.com"
-              className="w-full px-4 py-3.5 text-sm outline-none rounded-lg transition-all"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#F8FAFC',
-                fontFamily: 'Space Grotesk, sans-serif',
-              }}
-              onFocus={(e) => (e.target.style.borderColor = 'rgba(0,240,255,0.4)')}
-              onBlur={(e)  => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+              className="w-full px-4 py-3.5 text-sm outline-none rounded-lg"
+              style={inputStyle('email')}
             />
+            <FieldError message={errors.email} />
           </div>
         </div>
 
+        {/* Subject */}
         <div className="mb-4">
-          <label
-            className="block font-mono text-xs tracking-widest uppercase mb-2"
-            style={{ color: '#94A3B8' }}
-          >
-            Subject
-          </label>
+          <label className="block font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#94A3B8' }}>Subject</label>
           <input
             type="text"
+            name="subject"
+            value={fields.subject}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder="What's this about?"
             className="w-full px-4 py-3.5 text-sm outline-none rounded-lg"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#F8FAFC',
-              fontFamily: 'Space Grotesk, sans-serif',
-            }}
-            onFocus={(e) => (e.target.style.borderColor = 'rgba(0,240,255,0.4)')}
-            onBlur={(e)  => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+            style={inputStyle('subject')}
           />
+          <FieldError message={errors.subject} />
         </div>
 
+        {/* Message */}
         <div className="mb-6">
-          <label
-            className="block font-mono text-xs tracking-widest uppercase mb-2"
-            style={{ color: '#94A3B8' }}
-          >
-            Message
-          </label>
+          <label className="block font-mono text-xs tracking-widest uppercase mb-2" style={{ color: '#94A3B8' }}>Message</label>
           <textarea
+            name="message"
+            value={fields.message}
+            onChange={handleChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             placeholder="Tell me about your project..."
             rows={5}
             className="w-full px-4 py-3.5 text-sm outline-none rounded-lg resize-y"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#F8FAFC',
-              fontFamily: 'Space Grotesk, sans-serif',
-              minHeight: 120,
-            }}
-            onFocus={(e) => (e.target.style.borderColor = 'rgba(0,240,255,0.4)')}
-            onBlur={(e)  => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
+            style={{ ...inputStyle('message'), minHeight: 120 }}
           />
+          <FieldError message={errors.message} />
         </div>
 
-        {/* Submit button */}
+        {/* Submit */}
         <motion.button
           className="w-full py-4 rounded-lg font-bold text-base text-black border-none cursor-pointer relative z-10"
           style={{
@@ -260,39 +358,26 @@ export default function Contact() {
               ? 'linear-gradient(135deg, #34D399, #10B981)'
               : 'linear-gradient(135deg, #00F0FF, #8B5CF6)',
             boxShadow: '0 4px 24px rgba(0,240,255,0.2)',
-            transition: 'box-shadow 0.2s',
+            transition: 'background 0.3s, box-shadow 0.2s',
           }}
           whileHover={{ y: -2, boxShadow: '0 8px 40px rgba(0,240,255,0.35)' }}
           whileTap={{ scale: 0.99 }}
-          onClick={() => {
-            setSubmitted(true)
-            setTimeout(() => setSubmitted(false), 3000)
-          }}
+          onClick={handleSubmit}
         >
           {submitted ? '✓ Message Sent!' : 'Send Message →'}
         </motion.button>
 
-        {/* ── Social links ── */}
-        <div
-          className="flex gap-3 mt-8 pt-8 flex-wrap"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
-        >
+        {/* Social links */}
+        <div className="flex gap-3 mt-8 pt-8 flex-wrap" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           {socialLinks.map((link) => (
             <motion.a
               key={link.label}
               href={link.href}
               target="_blank"
               rel="noreferrer"
-              className="social-link flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm no-underline"
-              style={{
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#94A3B8',
-              }}
-              whileHover={{
-                borderColor: 'rgba(0,240,255,0.3)',
-                color: '#00F0FF',
-                background: 'rgba(0,240,255,0.04)',
-              }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm no-underline"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: '#94A3B8' }}
+              whileHover={{ borderColor: 'rgba(0,240,255,0.3)', color: '#00F0FF', background: 'rgba(0,240,255,0.04)' }}
             >
               {link.icon}
               {link.label}
