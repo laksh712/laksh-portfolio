@@ -16,38 +16,65 @@ interface TimelineItemProps {
 }
 
 // ── Data ─────────────────────────────────────────────────────────────────────
+// const experiences: Experience[] = [
+//   {
+//     date: '2023 — Present',
+//     role: 'Senior AI Engineer',
+//     company: 'Anthropic — San Francisco, CA',
+//     desc: 'Leading inference optimization systems. Reduced model serving costs 40% through custom quantization. Architected multi-region deployment for 99.99% uptime.',
+//     skills: ['MLOps', 'CUDA', 'Triton', 'Distributed Systems'],
+//     accent: 'blue',
+//   },
+//   {
+//     date: '2021 — 2023',
+//     role: 'ML Engineer II',
+//     company: 'Google DeepMind — London, UK',
+//     desc: 'Built production pipelines for large-scale LLM evaluation. Contributed to efficient attention research. Led team of 4 on RLHF infrastructure.',
+//     skills: ['JAX', 'TPU', 'RLHF', 'Python'],
+//     accent: 'purple',
+//   },
+//   {
+//     date: '2019 — 2021',
+//     role: 'Software Engineer',
+//     company: 'Stripe — Dublin, Ireland',
+//     desc: 'Fraud detection ML models processing $1T+ in payments annually. Improved catch rate 23% while reducing false positives.',
+//     skills: ['XGBoost', 'Kafka', 'Go', 'Flink'],
+//     accent: 'blue',
+//   },
+//   {
+//     date: '2015 — 2019',
+//     role: 'B.Sc. Computer Science & AI',
+//     company: 'MIT — Cambridge, MA',
+//     desc: 'Graduated with honors. Thesis on "Efficient Transformers for Long-Context Reasoning." Published 2 papers in NeurIPS.',
+//     skills: ['Research', 'NLP', 'Deep Learning'],
+//     accent: 'purple',
+//   },
+// ]
+
 const experiences: Experience[] = [
   {
-    date: '2023 — Present',
-    role: 'Senior AI Engineer',
-    company: 'Anthropic — San Francisco, CA',
-    desc: 'Leading inference optimization systems. Reduced model serving costs 40% through custom quantization. Architected multi-region deployment for 99.99% uptime.',
-    skills: ['MLOps', 'CUDA', 'Triton', 'Distributed Systems'],
+    date: '2024 — Present',
+    role: 'Full Stack Developer',
+    company: 'Sphinx Solutions Pvt. Ltd. — Pune, India',
+    desc: 'Developing scalable backend systems using Spring Boot and React.js. Built REST APIs, real-time features with WebSockets, and secure authentication systems. Integrated AWS S3, implemented cron jobs, and contributed to CI/CD pipelines using Jenkins.',
+    skills: ['Spring Boot', 'React.js', 'MySQL', 'WebSockets', 'AWS', 'Jenkins', 'System Design'],
     accent: 'blue',
   },
   {
-    date: '2021 — 2023',
-    role: 'ML Engineer II',
-    company: 'Google DeepMind — London, UK',
-    desc: 'Built production pipelines for large-scale LLM evaluation. Contributed to efficient attention research. Led team of 4 on RLHF infrastructure.',
-    skills: ['JAX', 'TPU', 'RLHF', 'Python'],
+    date: '2023 — 2024',
+    role: 'PG-DAC (Advanced Computing)',
+    company: 'CDAC ACTS — Pune',
+    desc: 'Completed advanced training in software engineering, backend systems, and full stack development with hands-on project experience.',
+    skills: ['Java', 'Data Structures', 'System Design', 'Web Development', 'C++'],
     accent: 'purple',
   },
   {
-    date: '2019 — 2021',
-    role: 'Software Engineer',
-    company: 'Stripe — Dublin, Ireland',
-    desc: 'Fraud detection ML models processing $1T+ in payments annually. Improved catch rate 23% while reducing false positives.',
-    skills: ['XGBoost', 'Kafka', 'Go', 'Flink'],
+    date: '2019 — 2023',
+    role: 'B.E. Computer Engineering',
+    company: "Modern Education Society's College of Engineering — Pune",
+    desc: 'Graduated with strong foundation in computer science, data structures, and software engineering principles.',
+    skills: ['OOP', 'Algorithms', 'Databases', 'SDLC', 'Team Projects', 'AI/ML Basics'],
     accent: 'blue',
-  },
-  {
-    date: '2015 — 2019',
-    role: 'B.Sc. Computer Science & AI',
-    company: 'MIT — Cambridge, MA',
-    desc: 'Graduated with honors. Thesis on "Efficient Transformers for Long-Context Reasoning." Published 2 papers in NeurIPS.',
-    skills: ['Research', 'NLP', 'Deep Learning'],
-    accent: 'purple',
   },
 ]
 
@@ -162,7 +189,7 @@ export default function Experience() {
           Where I've built.
         </h2>
         <p className="mt-3 text-base font-light" style={{ color: '#94A3B8' }}>
-          Five years of shipping at scale.
+          Building scalable systems and real-world products.
         </p>
       </motion.div>
 

@@ -268,7 +268,7 @@ function NeoDevCanvas() {
         // { s: 'cuda:GPU_0', x: cx - 205, y: cy + 92, col: BLUE },
         // { s: '<Tensor[512]>', x: cx + 152, y: cy + 82, col: '#34D399' },
         { s: 'REST API /v1/users', x: cx - 225, y: cy - 118, col: BLUE },
-        { s: 'S3 Upload ✓', x: cx + 148, y: cy - 128, col: PURPLE },
+        { s: 'DSA ✓', x: cx + 148, y: cy - 128, col: PURPLE },
         { s: 'Cron Job Active', x: cx - 205, y: cy + 92, col: BLUE },
         { s: 'AI Response 120ms', x: cx + 152, y: cy + 82, col: '#34D399' },
       ]
